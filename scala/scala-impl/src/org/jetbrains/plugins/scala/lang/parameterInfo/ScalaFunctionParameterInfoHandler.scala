@@ -508,6 +508,10 @@ class ScalaFunctionParameterInfoHandler extends ParameterInfoHandlerWithTabActio
         case args: ScArgumentExprList => Some(new CallInvocation(args))
         case t: ScTuple => create(t)(new InfixTupleInvocation(_))
         case u: ScUnitExpr => create(u)(new InfixUnitInvocation(_))
+        case e: ScReferenceExpression
+          if !e.getParent.isInstanceOf[ScArgumentExprList] &&
+            !(e.getParent.isInstanceOf[ScAssignStmt] && e.getParent.getParent.isInstanceOf[ScArgumentExprList]) =>
+          Some(new ReferenceExpressionInvocation(e))
         case e: ScExpression => create(e)(new InfixExpressionInvocation(_))
         case _ => None
       }
