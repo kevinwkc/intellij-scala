@@ -29,6 +29,10 @@ class ExpandImplicitHintsAction extends ToggleAction {
     if (state) {
       MouseHandler.removeEscKeyListeners()
     }
+
+    if (state) {
+      MouseHandler.removeEscKeyListeners()
+    }
   }
 }
 
