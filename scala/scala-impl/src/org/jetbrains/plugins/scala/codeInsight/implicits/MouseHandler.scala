@@ -267,7 +267,11 @@ class MouseHandler(project: Project,
           highlightedMatches = matches
 
           editor.getContentComponent.addKeyListener(new KeyAdapter {
-            override def keyReleased(keyEvent: KeyEvent): Unit = {
+            override def keyPressed(keyEvent: KeyEvent): Unit = handle()
+
+            override def keyReleased(keyEvent: KeyEvent): Unit = handle()
+
+            private def handle() = {
               editor.getContentComponent.removeKeyListener(this)
               clearHighlightedMatches()
             }
