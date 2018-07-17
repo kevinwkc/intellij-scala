@@ -181,6 +181,33 @@ class ScalaLineMarkerProvider(daemonSettings: DaemonCodeAnalyzerSettings, colors
 }
 
 private object GutterUtil {
+  private[gutter] final class ArrowDownLineMarkerInfo(
+    element:    PsiElement,
+    icon:       Icon,
+    markerType: ScalaMarkerType,
+    passId:     Int
+  ) extends MergeableLineMarkerInfo[PsiElement](
+        element,
+        element.getTextRange,
+        icon,
+        passId,
+        markerType.tooltipProvider,
+        markerType.navigationHandler,
+        GutterIconRenderer.Alignment.RIGHT
+      ) {
+    override def canMergeWith(other: MergeableLineMarkerInfo[_]): Boolean = other match {
+      case _: ArrowDownLineMarkerInfo => getElement != null && other.getElement != null
+      case _                          => false
+    }
+
+    override def getCommonIcon(list: util.List[MergeableLineMarkerInfo[_ <: PsiElement]]): Icon = icon
+
+    override def getCommonTooltip(
+      infos: util.List[MergeableLineMarkerInfo[_ <: PsiElement]]
+    ): IJFunction[_ >: PsiElement, String] =
+      _ => ScalaBundle.message("multiple.overriden.tooltip")
+  }
+
   private[gutter] final class ArrowUpLineMarkerInfo(
     element:            PsiElement,
     icon:               Icon,
@@ -206,7 +233,7 @@ private object GutterUtil {
     override def getCommonTooltip(
       infos: util.List[MergeableLineMarkerInfo[_ <: PsiElement]]
     ): IJFunction[_ >: PsiElement, String] =
-      _ => ScalaBundle.message("multiple.overrides.tooltip")
+      _ => ScalaBundle.message("multiple.overriding.tooltip")
 
     override def getElementPresentation(element: PsiElement): String =
       presentationParent.fold(super.getElementPresentation(element))(parent =>
@@ -263,15 +290,7 @@ private object GutterUtil {
             else IMPLEMENTED_INTERFACE_MARKER_RENDERER
 
           val markerType = ScalaMarkerType.overriddenMember
-          new LineMarkerInfo[PsiElement](
-            anchor,
-            anchor.getTextRange,
-            icon,
-            Pass.LINE_MARKERS,
-            markerType.tooltipProvider,
-            markerType.navigationHandler,
-            GutterIconRenderer.Alignment.RIGHT
-          ).toOption
+          new ArrowDownLineMarkerInfo(anchor, icon, markerType, Pass.LINE_MARKERS).toOption
         } else None
     }
 
